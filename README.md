@@ -57,6 +57,7 @@ local current = popup:GetValue()
 | `valueOffsetX` | `0` | Value horizontal offset |
 | `valueOffsetY` | `0` | Value vertical offset |
 | `bgColor` | dark gray | `{ r, g, b, a }` background |
+| `showBorder` | `true` | Show the popup's built-in one-unit black border |
 | `trackColor` | mid gray | `{ r, g, b, a }` track color |
 | `thumbSize` | `20` | Thumb width and height, minimum `10` |
 | `thumbColor` | atlas default | Optional `{ r, g, b, a }` thumb tint |
