@@ -32,7 +32,6 @@
 --       valueOffsetX   = 0,
 --       valueOffsetY   = 0,
 --       bgColor        = { r=0.1, g=0.1, b=0.1, a=0.95 },
---       showBorder     = true,
 --       trackColor     = { r=0.5, g=0.5, b=0.5, a=1 },
 --       thumbSize      = 20,
 --       thumbColor     = { r=1, g=1, b=1, a=1 },
@@ -47,7 +46,7 @@
 --   popup:GetValue()
 
 local MAJOR_VERSION = "LibPopupSlider-1.0"
-local MINOR_VERSION = 2
+local MINOR_VERSION = 1
 
 local function raiseError(message, level)
     error(MAJOR_VERSION .. ": " .. message, (level or 1) + 1)
@@ -389,7 +388,6 @@ function lib:Create(button, options)
     local markerSize       =  getNumberOption(options, "markerSize",       DEFAULT_MARKER_SIZE)
     local showEndMarkers   = getBooleanOption(options, "showEndMarkers",   DEFAULT_SHOW_END_MARKERS)
     local showMiddleMarker = getBooleanOption(options, "showMiddleMarker", DEFAULT_SHOW_MIDDLE_MARKER)
-    local showBorder       = getBooleanOption(options, "showBorder",       true)
     local fontSize         =  getNumberOption(options, "fontSize",         DEFAULT_FONT_SIZE)
     local labelFontSize    =  getNumberOption(options, "labelFontSize",    DEFAULT_LABEL_FONT_SIZE or fontSize)
     local valueFontSize    =  getNumberOption(options, "valueFontSize",    DEFAULT_VALUE_FONT_SIZE or fontSize)
@@ -492,19 +490,13 @@ function lib:Create(button, options)
     local popup = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
     popup:SetWidth(popupW)
     popup:SetFrameStrata("TOOLTIP")
-    local backdrop = {
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-    }
-    if showBorder then
-        backdrop.edgeFile = "Interface\\Buttons\\WHITE8x8"
-        backdrop.edgeSize = 1
-    end
-
-    popup:SetBackdrop(backdrop)
+    popup:SetBackdrop({
+        bgFile   = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        edgeSize = 1,
+    })
     popup:SetBackdropColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a or 1)
-    if showBorder then
-        popup:SetBackdropBorderColor(0, 0, 0, 1)
-    end
+    popup:SetBackdropBorderColor(0, 0, 0, 1)
     popup:Hide()
 
     -- -----------------------------------------------------------------
