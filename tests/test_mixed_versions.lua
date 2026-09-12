@@ -1,90 +1,59 @@
 local currentPath = assert(arg[1], "current library path is required")
-local baselinePath = assert(arg[2], "baseline library path is required")
+assert(arg[2], "at least one baseline library path is required")
+local Harness = dofile("tests/harness.lua")
 
-floor = math.floor
-max = math.max
-min = math.min
-
-local methods = {}
-local regionMeta = {
-    __index = function(_, key)
-        return methods[key] or function()
-        end
-    end,
-}
-
-local function NewRegion()
-    return setmetatable({}, regionMeta)
+local function AssertPresentation(popup)
+    assert(type(popup.GetVisualParts) == "function", "new popup lacks visual parts")
+    assert(type(popup.SetFontAppearance) == "function", "new popup lacks font appearance")
+    assert(type(popup.IsInteracting) == "function", "new popup lacks interaction state")
+    assert(not popup.backdrop.edgeFile, "new popup lost showBorder support")
+    assert(popup:GetVisualParts().frame == popup)
 end
 
-function methods:CreateTexture()
-    return NewRegion()
+for index = 2, #arg do
+    local baselinePath = arg[index]
+    local H = Harness.New()
+    H:Load(baselinePath)
+    local sharedLibrary, baselineMinor = H.env.LibStub("LibPopupSlider-1.0")
+    assert(baselineMinor < 3, "baseline must predate the presentation API")
+    local baselineCreate = sharedLibrary.Create
+    local button = H.NewRegion()
+    local existingPopup = sharedLibrary:Create(button, { minValue = 0, maxValue = 100, fontSize = 12 })
+    local existingSetValue = existingPopup.SetValue
+    existingPopup:SetValue(50, true)
+    H.state.mouseDown = true
+    button:RunScript("OnMouseDown", "LeftButton")
+
+    H:Load(currentPath)
+    local currentLibrary, currentMinor = H.env.LibStub("LibPopupSlider-1.0")
+    assert(currentLibrary == sharedLibrary and currentMinor == 3, "upgrade replaced the persistent table")
+    assert(sharedLibrary.Create ~= baselineCreate, "new Create did not replace the baseline")
+    assert(existingPopup.SetValue == existingSetValue, "upgrade rewrote an existing popup")
+    H.state.cursorY = H.state.cursorY + 18
+    existingPopup:RunScript("OnUpdate")
+    assert(existingPopup:GetValue() == 60, "upgrade broke an active legacy drag")
+    H.state.mouseDown = false
+    existingPopup:RunScript("OnUpdate")
+    assert(not existingPopup:IsShown() and not existingPopup:GetScript("OnUpdate"))
+    existingPopup:SetValue(70, true)
+    assert(existingPopup:GetValue() == 70, "existing popup lost value API")
+    assert(existingPopup.GetVisualParts == nil, "legacy popup was unexpectedly retrofitted")
+    AssertPresentation(sharedLibrary:Create(H.NewRegion(), { showBorder = false }))
+
+    local currentCreate = sharedLibrary.Create
+    H:Load(currentPath)
+    assert(sharedLibrary.Create == currentCreate, "equal-MINOR copy replaced Create")
+
+    H = Harness.New()
+    H:Load(currentPath)
+    sharedLibrary = H.env.LibStub("LibPopupSlider-1.0")
+    currentCreate = sharedLibrary.Create
+    local newPopup = sharedLibrary:Create(H.NewRegion(), { showBorder = false })
+    H:Load(baselinePath)
+    currentLibrary, currentMinor = H.env.LibStub("LibPopupSlider-1.0")
+    assert(currentLibrary == sharedLibrary and currentMinor == 3)
+    assert(sharedLibrary.Create == currentCreate, "older copy replaced new Create")
+    AssertPresentation(newPopup)
+    AssertPresentation(sharedLibrary:Create(H.NewRegion(), { showBorder = false }))
+    print("LibPopupSlider mixed MINOR " .. baselineMinor .. "/3 in both load orders: PASS")
 end
-
-function methods:CreateFontString()
-    return NewRegion()
-end
-
-function methods:SetBackdrop(backdrop)
-    self.backdrop = backdrop
-end
-
-UIParent = NewRegion()
-
-function CreateFrame()
-    return NewRegion()
-end
-
-local function NewLibStub()
-    local currentMinor = 0
-    local sharedLibrary = {}
-    local stub = {}
-
-    function stub:NewLibrary(_, minor)
-        if minor <= currentMinor then
-            return nil
-        end
-
-        currentMinor = minor
-
-        return sharedLibrary
-    end
-
-    function stub:GetMinor()
-        return currentMinor
-    end
-
-    function stub:GetLibrary()
-        return sharedLibrary
-    end
-
-    return stub
-end
-
-LibStub = NewLibStub()
-dofile(baselinePath)
-
-local sharedLibrary = LibStub:GetLibrary()
-local baselineCreate = sharedLibrary.Create
-local existingPopup = sharedLibrary:Create(NewRegion(), {})
-assert(LibStub:GetMinor() == 1, "baseline copy did not register as minor 1")
-
-dofile(currentPath)
-assert(LibStub:GetMinor() == 2, "current copy did not upgrade the shared library to minor 2")
-assert(sharedLibrary.Create ~= baselineCreate, "current Create implementation did not replace the baseline")
-
-existingPopup:SetValue(50, true)
-local upgradedPopup = sharedLibrary:Create(NewRegion(), { showBorder = false })
-assert(not upgradedPopup.backdrop.edgeFile, "upgraded library ignored showBorder after an old-first load")
-
-LibStub = NewLibStub()
-dofile(currentPath)
-
-sharedLibrary = LibStub:GetLibrary()
-local currentCreate = sharedLibrary.Create
-dofile(baselinePath)
-
-assert(LibStub:GetMinor() == 2, "baseline copy replaced a newer implementation")
-assert(sharedLibrary.Create == currentCreate, "baseline copy changed Create after a new-first load")
-
-print("LibPopupSlider mixed-version tests: PASS")
