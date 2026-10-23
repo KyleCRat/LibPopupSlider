@@ -54,51 +54,53 @@ local function raiseError(message, level)
 end
 
 if not LibStub then raiseError("requires LibStub.") end
+
 local lib = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
+
 if not lib then return end
 
 local floor = floor
 local gmatch = string.gmatch
 
 local MIN_SLIDER_HEIGHT = 72
-local MIN_POPUP_WIDTH   = 30
-local MIN_PADDING_Y     = 2
-local MIN_LABEL_GAP     = 2
-local MIN_THUMB_SIZE    = 10
-local MIN_MARKER_SIZE   = 4
-local MIN_FONT_SIZE     = 1
+local MIN_POPUP_WIDTH = 30
+local MIN_PADDING_Y = 2
+local MIN_LABEL_GAP = 2
+local MIN_THUMB_SIZE = 10
+local MIN_MARKER_SIZE = 4
+local MIN_FONT_SIZE = 1
 
-local DEFAULT_MIN_VALUE          = 0
-local DEFAULT_MAX_VALUE          = 100
-local DEFAULT_STEP               = 1
-local DEFAULT_SLIDER_HEIGHT      = 180
-local DEFAULT_SENSITIVITY        = 1
-local DEFAULT_POPUP_WIDTH        = 44
-local DEFAULT_PADDING_Y          = 4
-local DEFAULT_LABEL_GAP          = 4
-local DEFAULT_THUMB_SIZE         = 20
-local DEFAULT_MARKER_SIZE        = 8
-local DEFAULT_SHOW_END_MARKERS   = true
+local DEFAULT_MIN_VALUE = 0
+local DEFAULT_MAX_VALUE = 100
+local DEFAULT_STEP = 1
+local DEFAULT_SLIDER_HEIGHT = 180
+local DEFAULT_SENSITIVITY = 1
+local DEFAULT_POPUP_WIDTH = 44
+local DEFAULT_PADDING_Y = 4
+local DEFAULT_LABEL_GAP = 4
+local DEFAULT_THUMB_SIZE = 20
+local DEFAULT_MARKER_SIZE = 8
+local DEFAULT_SHOW_END_MARKERS = true
 local DEFAULT_SHOW_MIDDLE_MARKER = true
-local DEFAULT_FONT_SIZE          = nil
-local DEFAULT_LABEL_FONT_SIZE    = nil
-local DEFAULT_VALUE_FONT_SIZE    = nil
-local DEFAULT_FONT_PADDING_X     = 4
-local DEFAULT_FONT_MIN_SIZE      = 6
-local DEFAULT_FONT_MAX_SIZE      = nil
-local DEFAULT_LABEL_OFFSET_X     = 0
-local DEFAULT_LABEL_OFFSET_Y     = 0
-local DEFAULT_VALUE_OFFSET_X     = 0
-local DEFAULT_VALUE_OFFSET_Y     = 0
-local DEFAULT_FORMAT_VALUE       = tostring
-local DEFAULT_FONT               = "Fonts\\FRIZQT__.TTF"
-local DEFAULT_FONT_FLAGS         = "OUTLINE"
-local DEFAULT_VALUE_FIT_TEXT     = nil
+local DEFAULT_FONT_SIZE = nil
+local DEFAULT_LABEL_FONT_SIZE = nil
+local DEFAULT_VALUE_FONT_SIZE = nil
+local DEFAULT_FONT_PADDING_X = 4
+local DEFAULT_FONT_MIN_SIZE = 6
+local DEFAULT_FONT_MAX_SIZE = nil
+local DEFAULT_LABEL_OFFSET_X = 0
+local DEFAULT_LABEL_OFFSET_Y = 0
+local DEFAULT_VALUE_OFFSET_X = 0
+local DEFAULT_VALUE_OFFSET_Y = 0
+local DEFAULT_FORMAT_VALUE = tostring
+local DEFAULT_FONT = "Fonts\\FRIZQT__.TTF"
+local DEFAULT_FONT_FLAGS = "OUTLINE"
+local DEFAULT_VALUE_FIT_TEXT = nil
 
 local DEFAULT_AUTO_FONT_MAX_SIZE = 72
 
-local FONT_MEASURE_WIDTH  = 4096
-local FONT_FIT_FUDGE      = 2
+local FONT_MEASURE_WIDTH = 4096
+local FONT_FIT_FUDGE = 2
 local MAX_VALUE_FIT_STEPS = 1000
 
 -- -----------------------------------------------------------------------------
@@ -112,9 +114,7 @@ end
 local function getNumberOption(options, key, defaultValue)
     local value = options[key]
 
-    if value == nil then
-        return defaultValue
-    end
+    if value == nil then return defaultValue end
 
     if type(value) ~= "number" then
         raiseError(key .. " must be a number.", 3)
@@ -126,9 +126,7 @@ end
 local function getStringOption(options, key, defaultValue)
     local value = options[key]
 
-    if value == nil then
-        return defaultValue
-    end
+    if value == nil then return defaultValue end
 
     if type(value) ~= "string" then
         raiseError(key .. " must be a string.", 3)
@@ -140,9 +138,7 @@ end
 local function getBooleanOption(options, key, defaultValue)
     local value = options[key]
 
-    if value == nil then
-        return defaultValue
-    end
+    if value == nil then return defaultValue end
 
     if type(value) ~= "boolean" then
         raiseError(key .. " must be a boolean.", 3)
@@ -154,15 +150,14 @@ end
 local function getColorOption(options, key, defaultValue)
     local color = options[key]
 
-    if color == nil then
-        return defaultValue
-    end
+    if color == nil then return defaultValue end
 
     if type(color) ~= "table" then
         raiseError(key .. " must be a color table.", 3)
     end
 
-    if type(color.r) ~= "number"
+    if
+        type(color.r) ~= "number"
         or type(color.g) ~= "number"
         or type(color.b) ~= "number"
     then
@@ -193,17 +188,11 @@ local function setShown(region, shown)
 end
 
 local function prepareFontString(fontString)
-    if fontString.SetWordWrap then
-        fontString:SetWordWrap(false)
-    end
+    if fontString.SetWordWrap then fontString:SetWordWrap(false) end
 
-    if fontString.SetNonSpaceWrap then
-        fontString:SetNonSpaceWrap(false)
-    end
+    if fontString.SetNonSpaceWrap then fontString:SetNonSpaceWrap(false) end
 
-    if fontString.SetMaxLines then
-        fontString:SetMaxLines(1)
-    end
+    if fontString.SetMaxLines then fontString:SetMaxLines(1) end
 end
 
 local function getFontStringWidth(fontString)
@@ -252,18 +241,14 @@ local function fitFontString(
     local fitWidth = max(1, maxWidth - FONT_FIT_FUDGE)
     local bestSize = minFitSize
 
-    if maxFitSize < minFitSize then
-        maxFitSize = minFitSize
-    end
+    if maxFitSize < minFitSize then maxFitSize = minFitSize end
 
     for size = minFitSize, maxFitSize do
         fontString:SetWidth(FONT_MEASURE_WIDTH)
         fontString:SetFont(fontPath, size, fontFlags)
         fontString:SetText(text)
 
-        if getFontStringWidth(fontString) > fitWidth then
-            break
-        end
+        if getFontStringWidth(fontString) > fitWidth then break end
 
         bestSize = size
     end
@@ -278,13 +263,7 @@ local function fitFontString(
     return bestSize, height
 end
 
-local function measureTextWidth(
-    fontString,
-    text,
-    fontPath,
-    fontFlags,
-    fontSize
-)
+local function measureTextWidth(fontString, text, fontPath, fontFlags, fontSize)
     prepareFontString(fontString)
     fontString:SetWidth(FONT_MEASURE_WIDTH)
     fontString:SetFont(fontPath, fontSize, fontFlags)
@@ -345,13 +324,8 @@ local function getValueFitText(
 
     for i = 1, candidateCount do
         local text = candidateTexts[i]
-        local width = measureTextWidth(
-            fontString,
-            text,
-            fontPath,
-            fontFlags,
-            fontSize
-        )
+        local width =
+            measureTextWidth(fontString, text, fontPath, fontFlags, fontSize)
 
         if width > fitWidth then
             fitText = text
@@ -377,38 +351,68 @@ function lib:Create(button, options)
         raiseError("options must be a table.", 2)
     end
 
-    local minValue         =  getNumberOption(options, "minValue",         DEFAULT_MIN_VALUE)
-    local maxValue         =  getNumberOption(options, "maxValue",         DEFAULT_MAX_VALUE)
-    local step             =  getNumberOption(options, "step",             DEFAULT_STEP)
-    local sliderH          =  getNumberOption(options, "sliderHeight",     DEFAULT_SLIDER_HEIGHT)
-    local sensitivity      =  getNumberOption(options, "sensitivity",      DEFAULT_SENSITIVITY)
-    local popupW           =  getNumberOption(options, "popupWidth",       DEFAULT_POPUP_WIDTH)
-    local padY             =  getNumberOption(options, "paddingY",         DEFAULT_PADDING_Y)
-    local labelGap         =  getNumberOption(options, "labelGap",         DEFAULT_LABEL_GAP)
-    local thumbSize        =  getNumberOption(options, "thumbSize",        DEFAULT_THUMB_SIZE)
-    local markerSize       =  getNumberOption(options, "markerSize",       DEFAULT_MARKER_SIZE)
-    local showEndMarkers   = getBooleanOption(options, "showEndMarkers",   DEFAULT_SHOW_END_MARKERS)
-    local showMiddleMarker = getBooleanOption(options, "showMiddleMarker", DEFAULT_SHOW_MIDDLE_MARKER)
-    local showBorder       = getBooleanOption(options, "showBorder",       true)
-    local fontSize         =  getNumberOption(options, "fontSize",         DEFAULT_FONT_SIZE)
-    local labelFontSize    =  getNumberOption(options, "labelFontSize",    DEFAULT_LABEL_FONT_SIZE or fontSize)
-    local valueFontSize    =  getNumberOption(options, "valueFontSize",    DEFAULT_VALUE_FONT_SIZE or fontSize)
-    local fontPaddingX     =  getNumberOption(options, "fontPaddingX",     DEFAULT_FONT_PADDING_X)
-    local fontMinSize      =  getNumberOption(options, "fontMinSize",      DEFAULT_FONT_MIN_SIZE)
-    local fontMaxSize      =  getNumberOption(options, "fontMaxSize",      DEFAULT_FONT_MAX_SIZE)
-    local labelOffsetX     =  getNumberOption(options, "labelOffsetX",     DEFAULT_LABEL_OFFSET_X)
-    local labelOffsetY     =  getNumberOption(options, "labelOffsetY",     DEFAULT_LABEL_OFFSET_Y)
-    local valueOffsetX     =  getNumberOption(options, "valueOffsetX",     DEFAULT_VALUE_OFFSET_X)
-    local valueOffsetY     =  getNumberOption(options, "valueOffsetY",     DEFAULT_VALUE_OFFSET_Y)
-    local formatValue      =                 options.formatValue or        DEFAULT_FORMAT_VALUE
-    local font             =  getStringOption(options, "font",             DEFAULT_FONT)
-    local fontFlags        =  getStringOption(options, "fontFlags",        DEFAULT_FONT_FLAGS)
-    local valueFitText     =  getStringOption(options, "valueFitText",     DEFAULT_VALUE_FIT_TEXT)
+    local minValue = getNumberOption(options, "minValue", DEFAULT_MIN_VALUE)
+    local maxValue = getNumberOption(options, "maxValue", DEFAULT_MAX_VALUE)
+    local step = getNumberOption(options, "step", DEFAULT_STEP)
+    local sliderH =
+        getNumberOption(options, "sliderHeight", DEFAULT_SLIDER_HEIGHT)
+    local sensitivity =
+        getNumberOption(options, "sensitivity", DEFAULT_SENSITIVITY)
+    local popupW = getNumberOption(options, "popupWidth", DEFAULT_POPUP_WIDTH)
+    local padY = getNumberOption(options, "paddingY", DEFAULT_PADDING_Y)
+    local labelGap = getNumberOption(options, "labelGap", DEFAULT_LABEL_GAP)
+    local thumbSize = getNumberOption(options, "thumbSize", DEFAULT_THUMB_SIZE)
+    local markerSize =
+        getNumberOption(options, "markerSize", DEFAULT_MARKER_SIZE)
+    local showEndMarkers =
+        getBooleanOption(options, "showEndMarkers", DEFAULT_SHOW_END_MARKERS)
+    local showMiddleMarker = getBooleanOption(
+        options,
+        "showMiddleMarker",
+        DEFAULT_SHOW_MIDDLE_MARKER
+    )
+    local showBorder = getBooleanOption(options, "showBorder", true)
+    local fontSize = getNumberOption(options, "fontSize", DEFAULT_FONT_SIZE)
+    local labelFontSize = getNumberOption(
+        options,
+        "labelFontSize",
+        DEFAULT_LABEL_FONT_SIZE or fontSize
+    )
+    local valueFontSize = getNumberOption(
+        options,
+        "valueFontSize",
+        DEFAULT_VALUE_FONT_SIZE or fontSize
+    )
+    local fontPaddingX =
+        getNumberOption(options, "fontPaddingX", DEFAULT_FONT_PADDING_X)
+    local fontMinSize =
+        getNumberOption(options, "fontMinSize", DEFAULT_FONT_MIN_SIZE)
+    local fontMaxSize =
+        getNumberOption(options, "fontMaxSize", DEFAULT_FONT_MAX_SIZE)
+    local labelOffsetX =
+        getNumberOption(options, "labelOffsetX", DEFAULT_LABEL_OFFSET_X)
+    local labelOffsetY =
+        getNumberOption(options, "labelOffsetY", DEFAULT_LABEL_OFFSET_Y)
+    local valueOffsetX =
+        getNumberOption(options, "valueOffsetX", DEFAULT_VALUE_OFFSET_X)
+    local valueOffsetY =
+        getNumberOption(options, "valueOffsetY", DEFAULT_VALUE_OFFSET_Y)
+    local formatValue = options.formatValue or DEFAULT_FORMAT_VALUE
+    local font = getStringOption(options, "font", DEFAULT_FONT)
+    local fontFlags = getStringOption(options, "fontFlags", DEFAULT_FONT_FLAGS)
+    local valueFitText =
+        getStringOption(options, "valueFitText", DEFAULT_VALUE_FIT_TEXT)
 
-    local bgColor = getColorOption(options, "bgColor",
-        { r = 0.1, g = 0.1, b = 0.1, a = 0.95 })
-    local trackColor = getColorOption(options, "trackColor",
-        { r = 0.5, g = 0.5, b = 0.5, a = 1 })
+    local bgColor = getColorOption(
+        options,
+        "bgColor",
+        { r = 0.1, g = 0.1, b = 0.1, a = 0.95 }
+    )
+    local trackColor = getColorOption(
+        options,
+        "trackColor",
+        { r = 0.5, g = 0.5, b = 0.5, a = 1 }
+    )
     local markerColor = getColorOption(options, "markerColor", trackColor)
     local thumbColor = getColorOption(options, "thumbColor", nil)
 
@@ -416,17 +420,17 @@ function lib:Create(button, options)
         raiseError("maxValue must be greater than minValue.", 2)
     end
 
-    if step <= 0 then
-        raiseError("step must be greater than 0.", 1)
-    end
+    if step <= 0 then raiseError("step must be greater than 0.", 1) end
 
     if sensitivity <= 0 then
         raiseError("sensitivity must be greater than 0.", 2)
     end
 
     if sliderH < MIN_SLIDER_HEIGHT then
-        raiseError("sliderHeight must be at least "
-            .. MIN_SLIDER_HEIGHT .. ".", 2)
+        raiseError(
+            "sliderHeight must be at least " .. MIN_SLIDER_HEIGHT .. ".",
+            2
+        )
     end
 
     if popupW < MIN_POPUP_WIDTH then
@@ -470,20 +474,16 @@ function lib:Create(button, options)
     end
 
     if labelFontSize and labelFontSize < MIN_FONT_SIZE then
-        raiseError("labelFontSize must be at least "
-            .. MIN_FONT_SIZE .. ".", 2)
+        raiseError("labelFontSize must be at least " .. MIN_FONT_SIZE .. ".", 2)
     end
 
     if valueFontSize and valueFontSize < MIN_FONT_SIZE then
-        raiseError("valueFontSize must be at least "
-            .. MIN_FONT_SIZE .. ".", 2)
+        raiseError("valueFontSize must be at least " .. MIN_FONT_SIZE .. ".", 2)
     end
 
     local fontFitWidth = max(1, popupW - fontPaddingX * 2)
-    local autoFontMaxSize = fontMaxSize or max(
-        fontMinSize,
-        min(fontFitWidth, DEFAULT_AUTO_FONT_MAX_SIZE)
-    )
+    local autoFontMaxSize = fontMaxSize
+        or max(fontMinSize, min(fontFitWidth, DEFAULT_AUTO_FONT_MAX_SIZE))
 
     -- -----------------------------------------------------------------
     --- Popup frame
@@ -495,6 +495,7 @@ function lib:Create(button, options)
     local backdrop = {
         bgFile = "Interface\\Buttons\\WHITE8x8",
     }
+
     if showBorder then
         backdrop.edgeFile = "Interface\\Buttons\\WHITE8x8"
         backdrop.edgeSize = 1
@@ -502,9 +503,9 @@ function lib:Create(button, options)
 
     popup:SetBackdrop(backdrop)
     popup:SetBackdropColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a or 1)
-    if showBorder then
-        popup:SetBackdropBorderColor(0, 0, 0, 1)
-    end
+
+    if showBorder then popup:SetBackdropBorderColor(0, 0, 0, 1) end
+
     popup:Hide()
 
     -- -----------------------------------------------------------------
@@ -529,9 +530,9 @@ function lib:Create(button, options)
     local thumb = popup.slider:CreateTexture(nil, "ARTWORK")
     thumb:SetAtlas("Minimal_SliderBar_Button")
     thumb:SetSize(thumbSize, thumbSize)
-    if thumbColor then
-        applyVertexColor(thumb, thumbColor)
-    end
+
+    if thumbColor then applyVertexColor(thumb, thumbColor) end
+
     popup.slider:SetThumbTexture(thumb)
 
     -- -----------------------------------------------------------------
@@ -558,8 +559,13 @@ function lib:Create(button, options)
 
     popup.diamondBottom = createDiamond(popup.slider, "BOTTOM")
     popup.diamondBottom:ClearAllPoints()
-    popup.diamondBottom:SetPoint("CENTER", popup.slider, "BOTTOM",
-        0, markerInset)
+    popup.diamondBottom:SetPoint(
+        "CENTER",
+        popup.slider,
+        "BOTTOM",
+        0,
+        markerInset
+    )
     setShown(popup.diamondBottom, showEndMarkers)
 
     -- -----------------------------------------------------------------
@@ -580,13 +586,16 @@ function lib:Create(button, options)
     local layoutResolved = false
 
     local function layoutPopup()
-        if layoutResolved then
-            return
-        end
+        if layoutResolved then return end
 
         popup.label:ClearAllPoints()
-        popup.label:SetPoint("BOTTOM", popup.slider, "TOP",
-            labelOffsetX, labelGap + labelOffsetY)
+        popup.label:SetPoint(
+            "BOTTOM",
+            popup.slider,
+            "TOP",
+            labelOffsetX,
+            labelGap + labelOffsetY
+        )
         popup.label:SetWidth(fontFitWidth)
         popup.label:SetJustifyH("CENTER")
 
@@ -602,21 +611,27 @@ function lib:Create(button, options)
         )
 
         popup.value:ClearAllPoints()
-        popup.value:SetPoint("TOP", popup.slider, "BOTTOM",
-            valueOffsetX, -labelGap + valueOffsetY)
+        popup.value:SetPoint(
+            "TOP",
+            popup.slider,
+            "BOTTOM",
+            valueOffsetX,
+            -labelGap + valueOffsetY
+        )
         popup.value:SetWidth(fontFitWidth)
         popup.value:SetJustifyH("CENTER")
 
-        local fitText = valueFitText or getValueFitText(
-            popup.value,
-            formatValue,
-            minValue,
-            maxValue,
-            step,
-            font,
-            fontFlags,
-            fontMinSize
-        )
+        local fitText = valueFitText
+            or getValueFitText(
+                popup.value,
+                formatValue,
+                minValue,
+                maxValue,
+                step,
+                font,
+                fontFlags,
+                fontMinSize
+            )
         local valueHeight
 
         valueDisplaySize, valueHeight = fitFontString(
@@ -636,8 +651,13 @@ function lib:Create(button, options)
 
         popup:SetHeight(popupH)
         popup.slider:ClearAllPoints()
-        popup.slider:SetPoint("CENTER", popup, "BOTTOM",
-            0, bottomBandH + sliderH / 2)
+        popup.slider:SetPoint(
+            "CENTER",
+            popup,
+            "BOTTOM",
+            0,
+            bottomBandH + sliderH / 2
+        )
 
         if currentValue ~= nil then
             popup.value:SetFont(font, valueDisplaySize, fontFlags)
@@ -666,9 +686,7 @@ function lib:Create(button, options)
     local function setValue(value, silent)
         value = clamp(snap(value), minValue, maxValue)
 
-        if currentValue == value then
-            return false
-        end
+        if currentValue == value then return false end
 
         currentValue = value
         popup.value:SetFont(font, valueDisplaySize, fontFlags)
@@ -690,9 +708,7 @@ function lib:Create(button, options)
     local dragStartValue
 
     local function finishDrag()
-        if not dragStartY then
-            return
-        end
+        if not dragStartY then return end
 
         dragStartY = nil
         dragStartValue = nil
@@ -700,16 +716,13 @@ function lib:Create(button, options)
         popup:Hide()
     end
 
-    button:HookScript("OnMouseDown", function(self, mouseButton)
-        if mouseButton ~= "LeftButton" then
-            return
-        end
+    button:HookScript("OnMouseDown", function(_self, mouseButton)
+        if mouseButton ~= "LeftButton" then return end
 
         local mouseX, mouseY = GetCursorPosition()
         local uiScale = UIParent:GetEffectiveScale()
         dragStartY = mouseY / uiScale
-        dragStartValue = currentValue
-            or fromSlider(popup.slider:GetValue())
+        dragStartValue = currentValue or fromSlider(popup.slider:GetValue())
         currentValue = currentValue or dragStartValue
 
         popup:ClearAllPoints()
@@ -719,7 +732,8 @@ function lib:Create(button, options)
 
         local thumbFraction = (maxValue - dragStartValue)
             / (maxValue - minValue)
-        local thumbOffset = topBandH + thumbSize / 2
+        local thumbOffset = topBandH
+            + thumbSize / 2
             + thumbFraction * (sliderH - thumbSize)
 
         local popupX = mouseX / uiScale
@@ -744,8 +758,7 @@ function lib:Create(button, options)
             cursorY = cursorY / UIParent:GetEffectiveScale()
 
             local delta = cursorY - dragStartY
-            local pixelsPerUnit = sliderH * sensitivity
-                / (maxValue - minValue)
+            local pixelsPerUnit = sliderH * sensitivity / (maxValue - minValue)
 
             local rawValue = dragStartValue + delta / pixelsPerUnit
 
@@ -760,7 +773,7 @@ function lib:Create(button, options)
 
     button:HookScript("OnHide", finishDrag)
 
-    popup.slider:SetScript("OnValueChanged", function(self, value)
+    popup.slider:SetScript("OnValueChanged", function(_self, value)
         setValue(fromSlider(value))
     end)
 
@@ -768,7 +781,7 @@ function lib:Create(button, options)
     --- Public API
     -- -----------------------------------------------------------------
 
-    popup.SetValue = function(self, value, silent)
+    popup.SetValue = function(_self, value, silent)
         setValue(value, silent)
     end
 
@@ -779,13 +792,21 @@ function lib:Create(button, options)
     -- Declared visual parts for optional appearance libraries. The popup still
     -- owns layout, fitting, values, and drag lifetime; do not replace these parts.
     local visualParts = {
-        frame = popup, slider = popup.slider, track = popup.track, thumb = thumb,
-        label = popup.label, value = popup.value,
+        frame = popup,
+        slider = popup.slider,
+        track = popup.track,
+        thumb = thumb,
+        label = popup.label,
+        value = popup.value,
         markers = { popup.diamondTop, popup.diamondCenter, popup.diamondBottom },
-        backgroundColor = bgColor, trackColor = trackColor, markerColor = markerColor,
+        backgroundColor = bgColor,
+        trackColor = trackColor,
+        markerColor = markerColor,
         thumbColor = thumbColor or { r = 1, g = 1, b = 1, a = 1 },
-        font = font, fontFlags = fontFlags,
+        font = font,
+        fontFlags = fontFlags,
     }
+
     popup.GetVisualParts = function()
         return visualParts
     end
@@ -795,21 +816,32 @@ function lib:Create(button, options)
     end
 
     popup.SetFontAppearance = function(self, fontPath, flags)
-        if type(fontPath) ~= "string" or fontPath == "" or type(flags) ~= "string" then
-            raiseError("SetFontAppearance requires a font path and flags string.", 2)
+        if
+            type(fontPath) ~= "string"
+            or fontPath == ""
+            or type(flags) ~= "string"
+        then
+            raiseError(
+                "SetFontAppearance requires a font path and flags string.",
+                2
+            )
         end
-        if font == fontPath and fontFlags == flags then
-            return
-        end
+
+        if font == fontPath and fontFlags == flags then return end
+
         if dragStartY then
-            raiseError("Finish the active drag before changing font appearance.", 2)
+            raiseError(
+                "Finish the active drag before changing font appearance.",
+                2
+            )
         end
+
         font, fontFlags = fontPath, flags
         visualParts.font, visualParts.fontFlags = font, fontFlags
         layoutResolved = false
-        if self:IsShown() then
-            layoutPopup()
-        end
+
+        if self:IsShown() then layoutPopup() end
+
         self.value:SetFont(font, valueDisplaySize, fontFlags)
     end
 
