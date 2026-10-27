@@ -1,6 +1,7 @@
 local currentPath = assert(arg[1], "current library path is required")
 assert(arg[2], "at least one baseline library path is required")
 local Harness = dofile("tests/harness.lua")
+local CURRENT_MINOR = 4
 
 local function AssertPresentation(popup)
     assert(
@@ -24,13 +25,14 @@ for index = 2, #arg do
     local H = Harness.New()
     H:Load(baselinePath)
     local sharedLibrary, baselineMinor = H.env.LibStub("LibPopupSlider-1.0")
-    assert(baselineMinor < 3, "baseline must predate the presentation API")
+    assert(baselineMinor < CURRENT_MINOR, "baseline must predate this release")
     local baselineCreate = sharedLibrary.Create
     local button = H.NewRegion()
     local existingPopup = sharedLibrary:Create(button, {
         minValue = 0,
         maxValue = 100,
         fontSize = 12,
+        showBorder = false,
     })
     local existingSetValue = existingPopup.SetValue
     existingPopup:SetValue(50, true)
@@ -40,7 +42,7 @@ for index = 2, #arg do
     H:Load(currentPath)
     local currentLibrary, currentMinor = H.env.LibStub("LibPopupSlider-1.0")
     assert(
-        currentLibrary == sharedLibrary and currentMinor == 3,
+        currentLibrary == sharedLibrary and currentMinor == CURRENT_MINOR,
         "upgrade replaced the persistent table"
     )
     assert(
@@ -64,10 +66,14 @@ for index = 2, #arg do
     )
     existingPopup:SetValue(70, true)
     assert(existingPopup:GetValue() == 70, "existing popup lost value API")
-    assert(
-        existingPopup.GetVisualParts == nil,
-        "legacy popup was unexpectedly retrofitted"
-    )
+    if baselineMinor < 3 then
+        assert(
+            existingPopup.GetVisualParts == nil,
+            "legacy popup was unexpectedly retrofitted"
+        )
+    else
+        AssertPresentation(existingPopup)
+    end
     AssertPresentation(
         sharedLibrary:Create(H.NewRegion(), { showBorder = false })
     )
@@ -86,7 +92,7 @@ for index = 2, #arg do
     local newPopup = sharedLibrary:Create(H.NewRegion(), { showBorder = false })
     H:Load(baselinePath)
     currentLibrary, currentMinor = H.env.LibStub("LibPopupSlider-1.0")
-    assert(currentLibrary == sharedLibrary and currentMinor == 3)
+    assert(currentLibrary == sharedLibrary and currentMinor == CURRENT_MINOR)
     assert(
         sharedLibrary.Create == currentCreate,
         "older copy replaced new Create"
@@ -98,6 +104,8 @@ for index = 2, #arg do
     print(
         "LibPopupSlider mixed MINOR "
             .. baselineMinor
-            .. "/3 in both load orders: PASS"
+            .. "/"
+            .. CURRENT_MINOR
+            .. " in both load orders: PASS"
     )
 end

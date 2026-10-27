@@ -2,7 +2,7 @@ local sourcePath = arg[1] or "LibPopupSlider-1.0.lua"
 local H = dofile("tests/harness.lua").New()
 H:Load(sourcePath)
 local library, minor = H.env.LibStub("LibPopupSlider-1.0")
-assert(minor == 3, "unexpected LibStub minor")
+assert(minor == 4, "unexpected LibStub minor")
 
 local defaultPopup = library:Create(H.NewRegion(), {})
 assert(

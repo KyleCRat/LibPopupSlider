@@ -2,8 +2,8 @@
 
 A vertical drag-to-adjust slider popup for WoW addons. Click-and-drag on a button opens a slider at the cursor; release to dismiss.
 
-Release: `1.2.0`. Compatible LibStub family: `LibPopupSlider-1.0`, implementation
-MINOR `3`. Embed `LibPopupSlider-1.0.xml` after LibStub; no standalone TOC or
+Release: `1.2.1`. Compatible LibStub family: `LibPopupSlider-1.0`, implementation
+MINOR `4`. Embed `LibPopupSlider-1.0.xml` after LibStub; no standalone TOC or
 skin-library dependency is required.
 
 ## Usage
@@ -87,8 +87,8 @@ appearance libraries can use these public methods without replacing that behavio
   open. Changing fonts during a drag raises an error; defer it until the drag
   ends. Reapplying the current font is a no-op.
 
-These additive methods require release `1.2.0` / MINOR `3`. This revision wins
-LibStub selection over both older implementations (MINORs `1` and `2`) in
+These additive methods require release `1.2.0` / MINOR `3` or newer. Release
+`1.2.1` wins LibStub selection over older implementations (MINORs `1` to `3`) in
 either load order, while preserving `showBorder` and the original value API.
 Popups created before an upgrade retain their original behavior and methods;
 they are not recreated or retrofitted. Create new skinnable popups after the
@@ -100,11 +100,11 @@ Run from the library root using Lua 5.1:
 
 ```powershell
 lua tests/test_lib_popup_slider.lua
-lua tests/test_mixed_versions.lua LibPopupSlider-1.0.lua PATH_TO_1_0_SOURCE PATH_TO_1_1_SOURCE
+lua tests/test_mixed_versions.lua LibPopupSlider-1.0.lua PATH_TO_1_0_SOURCE PATH_TO_1_1_SOURCE PATH_TO_1_2_SOURCE
 ```
 
-The mixed-version suite accepts source files exported from the `1.0.0` and
-`1.1.0` tags. It checks old-first, new-first, equal-MINOR loads, and popups
+The mixed-version suite accepts source files exported from the `1.0.0`,
+`1.1.0`, and `1.2.0` tags. It checks old-first, new-first, equal-MINOR loads, and popups
 created before upgrade. In game, verify scale dragging and Modern/Flat
 transitions with addons embedding both older revisions enabled.
 

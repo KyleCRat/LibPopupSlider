@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1] - 2026-10-27
+
+### Changed
+- Standardize Lua formatting and add standalone StyLua/Selene checks for the
+  library and its tests. The public API and slider behavior are unchanged.
+- Advance LibStub MINOR to 4 so the maintained implementation wins selection
+  over earlier embeds.
+
 ## [1.2.0] - 2026-09-12
 
 ### Added

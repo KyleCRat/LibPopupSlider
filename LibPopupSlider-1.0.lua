@@ -47,7 +47,7 @@
 --   popup:GetValue()
 
 local MAJOR_VERSION = "LibPopupSlider-1.0"
-local MINOR_VERSION = 3
+local MINOR_VERSION = 4
 
 local function raiseError(message, level)
     error(MAJOR_VERSION .. ": " .. message, (level or 1) + 1)
